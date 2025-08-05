@@ -1,5 +1,3 @@
-setwd("~/Documents/WCHSCU/COPD/Fut2/20250123/codes/")
-
 rm(list=ls())
 graphics.off()
 
@@ -58,11 +56,6 @@ metadata_plot_ae$class <- paste0(metadata_plot_ae$secre,"_", metadata_plot_ae$To
 metadata_plot_ae$AE <- ifelse(metadata_plot_ae$TotalAEV2 == 0, "No-AE", "AE")
 metadata_plot_ae$class_2 <- paste0(metadata_plot_ae$secre,"_", metadata_plot_ae$AE)
 
-table(metadata_plot$Midgroup)
-
-# COPDNonse COPDSecre      HCon 
-# 24       146        44
-
 # a diversity -------------------------------------------------------------
 
 shan_index <- vegan::diversity(t(abundance), "shannon")
@@ -120,27 +113,19 @@ adiversity_COPDSecre <- subset(adiversity, Midgroup == "COPDSecre")
 adiversity_COPDNonse <- subset(adiversity, Midgroup == "COPDNonse")
 
 wilcox.test(adiversity_HCon$Shannon, adiversity_COPDNonse$Shannon, alternative = "two.sided")
-# W = 751, p-value = 0.003788
 wilcox.test(adiversity_HCon$Shannon, adiversity_COPDSecre$Shannon, alternative = "two.sided")
-# W = 4222, p-value = 0.001594
 wilcox.test(adiversity_COPDNonse$Shannon, adiversity_COPDSecre$Shannon, alternative = "two.sided")
-# W = 1505, p-value = 0.27
+
 
 
 wilcox.test(adiversity_HCon$Simpson, adiversity_COPDNonse$Simpson, alternative = "two.sided")
-# W = 765, p-value = 0.002024
 wilcox.test(adiversity_HCon$Simpson, adiversity_COPDSecre$Simpson, alternative = "two.sided")
-# W = 4359, p-value = 0.0003365
 wilcox.test(adiversity_COPDNonse$Simpson, adiversity_COPDSecre$Simpson, alternative = "two.sided")
-# W = 1523, p-value = 0.3065
 
 
 wilcox.test(adiversity_HCon$Invsimpson, adiversity_COPDNonse$Invsimpson, alternative = "two.sided")
-# W = 765, p-value = 0.002024
 wilcox.test(adiversity_HCon$Invsimpson, adiversity_COPDSecre$Invsimpson, alternative = "two.sided")
-# W = 4359, p-value = 0.0003365
 wilcox.test(adiversity_COPDNonse$Invsimpson, adiversity_COPDSecre$Invsimpson, alternative = "two.sided")
-# W = 1523, p-value = 0.3065
 
 write.table(adiversity, file = "../version1/results/a_diversity.txt", sep = "\t", col.names = T, 
             quote = FALSE, row.names = F)
@@ -188,7 +173,7 @@ metadata_pcoa <- metadata_pcoa[colnames(abundance),]
 
 adonis <- adonis2(data.frame(t(abundance)) ~ Midgroup, metadata_pcoa, permutations = 999, na.rm = T)
 adonis 
-# R2 = 0.03966, F = 4.3573, p = 0.001 ***
+
 
 
 # test
@@ -198,7 +183,7 @@ pcoa_COPDNonse <- subset(pcoa_plot, Midgroup == "COPDNonse")
 
 
 wilcox.test(pcoa_COPDSecre$PcoA1, pcoa_COPDNonse$PcoA1, alternative = "two.sided")
-# W = 1729, p-value = 0.9198
+
 
 
 
@@ -210,7 +195,7 @@ abundance_pcoa_pairwise_no_hc <- abundance[, colnames(abundance) %in% metadata_p
 adonis_no_hc <- adonis2(data.frame(t(abundance_pcoa_pairwise_no_hc)) ~ Midgroup, metadata_pcoa_pairwise_no_hc, 
                   permutations = 999, na.rm = T)
 adonis_no_hc 
-# R2 = 0.0064, F = 1.0822, p = 0.333
+
 
 # no COPDSecre
 metadata_pcoa_pairwise_no_COPDSecre <- subset(metadata_pcoa, Midgroup != "COPDSecre")
@@ -219,7 +204,7 @@ abundance_pcoa_pairwise_no_COPDSecre <- abundance[, colnames(abundance) %in% met
 adonis_no_COPDSecre <- adonis2(data.frame(t(abundance_pcoa_pairwise_no_COPDSecre)) ~ Midgroup, metadata_pcoa_pairwise_no_COPDSecre, 
                                permutations = 999, na.rm = T)
 adonis_no_COPDSecre
-# R2 = 0.09011, F = 6.5363, p = 0.001
+
 
 # no COPDNonse
 metadata_pcoa_pairwise_no_COPDNonse <- subset(metadata_pcoa, Midgroup != "COPDNonse")
@@ -228,7 +213,7 @@ abundance_pcoa_pairwise_no_COPDNonse <- abundance[, colnames(abundance) %in% met
 adonis_no_COPDNonse <- adonis2(data.frame(t(abundance_pcoa_pairwise_no_COPDNonse)) ~ Midgroup, metadata_pcoa_pairwise_no_COPDNonse, 
                                permutations = 999, na.rm = T)
 adonis_no_COPDNonse
-# R2 = 0.03561, F = 6.9427, p = 0.001
+
 
 
 
@@ -344,7 +329,6 @@ graphics.off()
 # differential bacteria ---------------------------------------------------
 
 abundance_diff <- abundance[apply(abundance == 0, 1, sum) <= (ncol(abundance) * 0.9), ]
-# 127 genus
 abundance_t <- data.frame(t(abundance_diff))
 abundance_t$SampleID <- rownames(abundance_t)
 adiversity_com <- dplyr::select(adiversity, SampleID, Midgroup)
@@ -410,10 +394,9 @@ adiversity_ae <- adiversity
 adiversity_ae$SampleID <- paste0(substr(adiversity_ae$SampleID, 16, 17), "_", str_split_fixed(adiversity_ae$SampleID, "\\.", 3)[,2])
 
 adiversity_ae <- left_join(metadata_plot_ae, adiversity_ae, by = "SampleID") %>% drop_na()
-# 150
-table(adiversity_ae$AE)
-#  AE No-AE 
-# 63    87
+
+
+
 
 write.table(adiversity_ae, "../version1/results/a_diversity_ae.txt", 
             sep = '\t', col.names = T, quote = FALSE, row.names = F)
@@ -456,11 +439,9 @@ adiversity_ae_value <- subset(adiversity_ae, AE == "AE")
 adiversity_not_ae_value <- subset(adiversity_ae, AE == "No-AE")
 
 wilcox.test(adiversity_ae_value$Shannon, adiversity_not_ae_value$Shannon, alternative = "two.sided")
-# W = 2379, p-value = 0.1693
 wilcox.test(adiversity_ae_value$Simpson, adiversity_not_ae_value$Simpson, alternative = "two.sided")
-# W = 2346, p-value = 0.1335
 wilcox.test(adiversity_ae_value$Invsimpson, adiversity_not_ae_value$Invsimpson, alternative = "two.sided")
-# W = 2346, p-value = 0.1335
+
 
 abundance_ae <- abundance
 colnames(abundance_ae) <- paste0(substr(colnames(abundance_ae), 16, 17), "_", str_split_fixed(colnames(abundance_ae), "\\.", 3)[,2])
@@ -578,7 +559,7 @@ graphics.off()
 
 # differential bacteria
 abundance_diff_ae <- abundance_ae[apply(abundance_ae == 0, 1, sum) <= (ncol(abundance_ae) * 0.9), ]
-# 128 genus
+
 abundance_t <- data.frame(t(abundance_diff_ae))
 abundance_t$SampleID <- rownames(abundance_t)
 adiversity_com <- dplyr::select(metadata_plot_ae, SampleID, AE)
@@ -655,13 +636,11 @@ graphics.off()
 fit_1 <- lm(shan_index ~ k__Bacteria.p__Proteobacteria.c__Gammaproteobacteria.o__Pasteurellales.f__Pasteurellaceae.g__Haemophilus, 
             data = abundance_correlation)
 summary(fit_1)
-# Multiple R-squared:  0.398,	Adjusted R-squared:  0.3939 
-# F-statistic: 97.85 on 1 and 148 DF,  p-value: < 2.2e-16
+
 
 spearman_result_1 <- cor.test(abundance_correlation$shan_index, abundance_correlation$k__Bacteria.p__Proteobacteria.c__Gammaproteobacteria.o__Pasteurellales.f__Pasteurellaceae.g__Haemophilus)
 spearman_result_1 
-# t = -9.8921, df = 148, p-value < 2.2e-16
-#        cor -0.6308849
+
 
 # hea
 abundance_hae <- left_join(abundance_correlation, metadata_plot_ae, by = "SampleID")
@@ -684,7 +663,7 @@ abundance_no_ae_hae <- subset(abundance_hae, AE == "No-AE")
 
 wilcox.test(abundance_ae_hae$k__Bacteria.p__Proteobacteria.c__Gammaproteobacteria.o__Pasteurellales.f__Pasteurellaceae.g__Haemophilus, 
             abundance_no_ae_hae$k__Bacteria.p__Proteobacteria.c__Gammaproteobacteria.o__Pasteurellales.f__Pasteurellaceae.g__Haemophilus, alternative = "two.sided")
-# W = 3320.5, p-value = 0.02734
+
 
 
 
